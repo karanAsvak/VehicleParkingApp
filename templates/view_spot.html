@@ -1,0 +1,34 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<div class="container text-center border rounded w-75 p-3">
+    <div class="row g-3">
+        <div class="col-6 rounded text-end">
+            Spot Id  :
+        </div>
+        <div class="col-6 rounded">
+            {{id}}
+        </div>
+        <div class="col-6  rounded text-end">
+            Status  :
+        </div>
+        <div class="col-6 rounded">
+            <a type="submit" class="btn {% if status=='A' %} btn-success disabled {% else %} btn-danger {% endif %}">
+                {{status}}
+            </a>
+            
+        </div>
+        {% if status=='A' %}
+        <a class="col-6" href="{{url_for('delete_spot',id=id)}}">
+            <button type="submit" class="btn btn-danger">
+                Delete
+            </button>
+        </a>
+        <a class="col-6" href="{{url_for('admin')}}">
+            <button type="submit" class="btn btn-info">
+                Close
+            </button>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

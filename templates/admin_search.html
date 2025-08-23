@@ -1,0 +1,20 @@
+{% extends "admin_base.html" %}
+{% block content %}
+<form class="container form-group" method="POST">
+    <div class="row">
+    <select class="form-select col mx-2" id="SearchKey">
+        <option selected disabled>Search by</option>
+        <option value="location">Location</option>
+        <option value="pincode">Pincode</option>
+        <option value="id">User Id</option>
+    </select>
+    <input type="text" placeholder="Enter string"  class="form-control col mx-2">
+    </div>
+    <div class="text-center">
+    <button class="btn btn-success" type="submit">Search</button>
+    </div>
+    </form>
+    <div class="container-fluid text-center bg-primary text-dark h2">
+        Parking Lots @ location,...
+    </div>
+{% endblock %}

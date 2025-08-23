@@ -1,0 +1,29 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<form action="/addLot" method="post" class="container form-group">
+<div class="row">
+    <label for="location">Location:</label>
+    <input type="text" name="location" id="location">
+</div>
+<div class="row">
+    <label for="price">Price:</label>
+    <input type="number" name="price">
+</div>
+<div class="row">
+    <label for="address">Address:</label>
+    <input type="text" name="address" id="address">
+</div>
+<div class="row">
+    <label for="pincode">Pincode:</label>
+    <input type="text" name="pincode" id="pincode">
+</div>
+<div class="row">
+    <label for="maxspot">Maximum Spots:</label> 
+    <input type="number" name="maxspot" id="maxspot">
+</div>
+<div class="row">
+    <button class="btn btn-success" type="submit">ADD</button>
+</div>
+</form>
+{% endblock %}
