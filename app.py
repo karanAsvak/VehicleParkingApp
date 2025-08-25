@@ -171,23 +171,14 @@ def admin_summary():
     return render_template('admin_summary.html',active_tab='summary')
 
 
-@app.route('/user')
+@app.route('/user',methods=['GET','POST'])
 @login_required
 def user():
-    if request.method=='GET':
-        lots=Lot.query.all()
-        lot_spots=[]
-        for lot in lots:
-            container=[[lot.id,lot.prime_location_name,lot.address,lot.price]]
-            spots=Spot.query.filter_by(lot_id=lot.id).all()
-            occupied=False
-            for spot in spots:
-                container.append([spot.id,spot.status])
-                if spot.status=='O':
-                    occupied=True
-            container.append(occupied)
-            lot_spots.append(container)
-        return render_template('user_home.html',user=current_user.name,active_tab='home',lot_spots=lot_spots)
+    if request.method=='POST':
+        location=request.form.get('loc')
+        lot_spot=db.session.query(Lot,Spot).join(Spot,Lot.id==Spot.lot_id).filter(db.or_(Lot.prime_location_name==location,Lot.pin_code==location)).all()
+        return render_template('user_home.html',user=current_user.name,active_tab='home',lot_spot=lot_spot,location=location)
+    return render_template('user_home.html',user=current_user.name,active_tab='home')
 
 
 @app.route('/user/summary')
