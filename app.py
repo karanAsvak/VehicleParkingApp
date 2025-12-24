@@ -3,6 +3,7 @@ from models import db, User, Admin, Lot, Spot, Reservation
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_mail import Mail, Message
+import os
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -11,12 +12,17 @@ app.config['SECRET_KEY'] = 'a-very-secret-and-unique-key'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'karanasvak@gmail.com'  # Replace with your email
-app.config['MAIL_PASSWORD'] = 'fvhp oqzu qxna toov'  # Replace with your app password
-app.config['MAIL_DEFAULT_SENDER'] = 'karanasvak@gmail.com'  # Replace with your email
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT"))
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS") == "True"
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+
+app.config["MAIL_DEFAULT_SENDER"] = (
+    "Vehicle Parking App",
+    os.getenv("MAIL_USERNAME")
+)
+
 
 mail = Mail(app)
 
