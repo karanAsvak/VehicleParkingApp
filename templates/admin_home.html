@@ -1,54 +1,65 @@
 {% extends "admin_base.html" %}
 
 {% block content %}
-    <div class="container text-center bg-primary text-dark h2">
-        Parking Lots
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-primary">Parking Lots Management</h2>
     </div>
-    
-   <div class="container-fluid mt-4">
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('add_lot') }}" class="btn btn-success">+ Add New Lot</a>
+    </div>
+</div>
+
+{% if lot_spots %}
     <div class="row g-4">
+    <small class="text-muted mt-2 d-block ">
+                            <img src="{{ url_for('static', filename='bike-icon.png') }}" alt="Bike" style="width: 14px; height: 14px; vertical-align: middle;"> = Two-Wheeler | 
+                            <img src="{{ url_for('static', filename='car-icon.png') }}" alt="Car" style="width: 14px; height: 14px; vertical-align: middle;"> = Four-Wheeler
+    </small>
     {% for container in lot_spots %}
-    <div class="col-12 col-md-6 col-lg-4 border rounded">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12 ">Location:{{container[0][1]}}</div>
-                <div class= "col-12  ">Address:{{container[0][2]}}</div>
-                <div class="col-12 ">Price:{{container[0][3]}}</div>
-            {% for spot in container[1:-1] %}
-                <div class="col-2 p-2">
-                    <a href="{{url_for('view_spot',id=spot[0],status=spot[1])}}">
-                    <button type="submit" class="{% if spot[1]=='A' %} btn btn-success  {% else %} btn btn-danger {% endif %}">
-                        {{spot[1]}}
-                    </button>
-                    </a>
+        <div class="col-12 col-md-6 col-lg-4 d-flex">
+            <div class="card h-100 w-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ container[0][1] }}</h5>
                 </div>
-            {% endfor %}
-            </div>
-            <div class="row">
-            <div class="col-6 text-center p-2">
-                <a href="{{url_for('edit_lot',id=container[0][0])}}">
-                    <button type="submit" class="btn btn-warning">Edit</button>
-                </a>
-                
-            </div>
-            {% if not container[-1] %}
-            <div class="col-6 text-center p-2">
-                <a href="{{url_for('delete_lot',id=container[0][0])}}">
-                <button type="submit" class="btn btn-danger">Delete</button>
-                </a>
-            </div>
-            {% endif %}
+                <div class="card-body">
+                    <p class="mb-1"><strong>Location:</strong> {{ container[0][1] }}</p>
+                    <p class="mb-1"><strong>Address:</strong> {{ container[0][2] }}</p>
+                    <p class="mb-3"><strong>Rate:</strong> ₹{{ container[0][3] }}/hour</p>
+                    
+                    <div class="mb-3">
+                        <h6>Parking Spots:</h6>
+                        <div class="d-flex flex-wrap gap-2" style="justify-content: flex-start; max-width: 100%;">
+                        
+                        {% for spot in container[1:-1] %}
+                            <a href="{{ url_for('view_spot', id=spot[0], status=spot[1]) }}" title="Spot {{ spot[0] }} - {{ spot[2] }}">
+                                <button type="button" style="width: {% if spot[2] == 'Two-Wheeler' %} 80px {% else %} 80px {% endif %};" class="btn btn-sm btn-spot {% if spot[1] == 'A' %}btn-success{% elif spot[1] == 'O' %}btn-danger{% else %}btn-warning{% endif %}">
+                                    <span style="font-weight: bold; ">{{ spot[0] }}</span>
+                                    <br>
+                                    <img src="{{ url_for('static', filename='bike-icon.png' if spot[2] == 'Two-Wheeler' else 'car-icon.png') }}" alt="{{ spot[2] }}" 
+                                    style=" {% if spot[2] == 'Two-Wheeler' %} width: 40px; height: 40px; {% else %} width: 45px; height: 45px; {% endif %} object-fit: contain; margin-left: 3px;">
+                                </button>
+                            </a>
+                        {% endfor %}
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('edit_lot', id=container[0][0]) }}" class="btn btn-warning btn-sm">Edit</a>
+                    {% if not container[-1] %}
+                        <a href="{{ url_for('delete_lot', id=container[0][0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</a>
+                    {% else %}
+                        <button type="button" class="btn btn-secondary btn-sm" disabled>Has Bookings</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-
     {% endfor %}
-   </div>
-   </div>
-   
-    <div class="text-center mt-3">
-        <a href="{{url_for('add_lot')}}">
-        <button class="btn btn-primary">+ Add Lot</button>
-        </a>
     </div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        No parking lots created yet. <a href="{{ url_for('add_lot') }}" class="alert-link">Create one now</a>
+    </div>
+{% endif %}
 {% endblock %}

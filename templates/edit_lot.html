@@ -1,21 +1,48 @@
 {% extends "admin_base.html" %}
+
 {% block content %}
-<div class="container">
-    <form action="{{url_for('edit_lot',id=id)}}" method="post" class="form-group">
-        <div class="row">
-            <div class="col-12 text-center fw-bolder py-3">
-                Increase/Decrease Maximum number of Spots
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-primary">Edit Parking Lot</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Modify Parking Spots</h5>
             </div>
-            <label for="maxspot" class="col-md-6">
-                Enter preferred spots:
-            </label>
-            <input type="number" name="maxspot" id="maxspot" class="col-md-6">
+            <div class="card-body">
+                {% if lot %}
+                    <p><strong>Current Spots:</strong> {{ lot.maximum_number_of_spots }}</p>
+                {% endif %}
+                
+                <form action="{{ url_for('edit_lot', id=id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="maxspot" class="form-label">New Number of Spots:</label>
+                        <input type="number" name="maxspot" id="maxspot" class="form-control" required min="1" {% if lot %}value="{{ lot.maximum_number_of_spots }}"{% endif %}>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">Update Spots</button>
+                        <a href="{{ url_for('admin', id=session['user_id']) }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="col-12 text-center p-3">
-            <button type="submit" class="btn btn-success">
-                Modify
-            </button>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="alert alert-warning">
+            <h5>⚠️ Important:</h5>
+            <ul class="mb-0">
+                <li>You can increase spots anytime</li>
+                <li>To decrease, only available (empty) spots can be removed</li>
+                <li>Cannot remove occupied spots</li>
+                <li>System will prevent invalid modifications</li>
+            </ul>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

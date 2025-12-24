@@ -1,4 +1,4 @@
 flask
-flask-login
 flask_sqlalchemy
-jinja2
+werkzeug
+flask-mail

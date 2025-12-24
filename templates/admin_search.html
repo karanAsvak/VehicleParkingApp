@@ -1,20 +1,68 @@
 {% extends "admin_base.html" %}
+
 {% block content %}
-<form class="container form-group" method="POST">
-    <div class="row">
-    <select class="form-select col mx-2" id="SearchKey">
-        <option selected disabled>Search by</option>
-        <option value="location">Location</option>
-        <option value="pincode">Pincode</option>
-        <option value="id">User Id</option>
-    </select>
-    <input type="text" placeholder="Enter string"  class="form-control col mx-2">
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-primary">Search Users</h2>
     </div>
-    <div class="text-center">
-    <button class="btn btn-success" type="submit">Search</button>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('admin_search') }}" method="post">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search by username, name, or pincode..." value="{{ query }}">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    </form>
-    <div class="container-fluid text-center bg-primary text-dark h2">
-        Parking Lots @ location,...
+</div>
+
+{% if results %}
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Search Results ({{ results|length }} users found)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Pincode</th>
+                            <th>Total Bookings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in results %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email if user.email else 'N/A' }}</td>
+                            <td>{{ user.pincode }}</td>
+                            <td>{{ user.reservations|length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+{% elif query %}
+    <div class="alert alert-info">
+        No users found matching "{{ query }}"
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Enter a search term to find users
+    </div>
+{% endif %}
 {% endblock %}

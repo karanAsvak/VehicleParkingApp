@@ -1,34 +1,79 @@
 {% extends "admin_base.html" %}
+
 {% block content %}
-<div class="container text-center border rounded w-75 p-3">
-    <div class="row g-3">
-        <div class="col-6 rounded text-end">
-            Spot Id  :
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-primary">Spot Details</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Parking Spot #{{ id }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Spot ID:</strong> {{ id }}
+                </div>
+                {% if spot %}
+                <div class="mb-3">
+                    <strong>Vehicle Type:</strong> {{ spot.vehicle_type }}
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>Status:</strong>
+                    <span class="badge {% if status == 'A' %}bg-success{% elif status == 'O' %}bg-danger{% else %}bg-warning{% endif %}">
+                        {% if status == 'A' %}Available{% elif status == 'O' %}Occupied{% else %}Reserved{% endif %}
+                    </span>
+                </div>
+                
+                {% if booking_info %}
+                <hr>
+                <h6 class="text-primary">Booking Details:</h6>
+                <div class="mb-2">
+                    <strong>User Name:</strong> {{ booking_info.user_name }}
+                </div>
+                <div class="mb-2">
+                    <strong>Vehicle Number:</strong> <span class="badge bg-dark">{{ booking_info.vehicle_number }}</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Vehicle Type:</strong> {{ booking_info.vehicle_type }}
+                </div>
+                <div class="mb-2">
+                    <strong>Parked Since:</strong> {{ booking_info.parking_timestamp.strftime('%d %b %Y, %I:%M %p') }}
+                </div>
+                <div class="mb-2">
+                    <strong>Rate:</strong> ₹{{ booking_info.cost_per_hour }}/hour
+                </div>
+                {% endif %}
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    {% if status == 'A' %}
+                        <a href="{{ url_for('delete_spot', id=id) }}" class="btn btn-danger" onclick="return confirm('Delete this spot?');">
+                            Delete Spot
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('admin', id=session['user_id']) }}" class="btn btn-secondary">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="col-6 rounded">
-            {{id}}
+    </div>
+    
+    <div class="col-md-6">
+        <div class="alert alert-info">
+            <h5>Spot Information:</h5>
+            <ul class="mb-0">
+                <li><strong>Green:</strong> Available for booking</li>
+                <li><strong>Red:</strong> Currently occupied</li>
+                <li><strong>Yellow:</strong> Reserved</li>
+            </ul>
         </div>
-        <div class="col-6  rounded text-end">
-            Status  :
-        </div>
-        <div class="col-6 rounded">
-            <a type="submit" class="btn {% if status=='A' %} btn-success disabled {% else %} btn-danger {% endif %}">
-                {{status}}
-            </a>
-            
-        </div>
-        {% if status=='A' %}
-        <a class="col-6" href="{{url_for('delete_spot',id=id)}}">
-            <button type="submit" class="btn btn-danger">
-                Delete
-            </button>
-        </a>
-        <a class="col-6" href="{{url_for('admin')}}">
-            <button type="submit" class="btn btn-info">
-                Close
-            </button>
-        </a>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

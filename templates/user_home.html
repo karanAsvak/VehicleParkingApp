@@ -1,28 +1,175 @@
 {% extends "user_base.html" %}
+
 {% block content %}
-    <div class="container-fluid text-center bg-primary text-dark p-2 h2">
-        Recent parking history
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="text-primary">Find Parking Spots</h2>
     </div>
-    <div class="table-hover"></div>
-    <hr>
-    <div class="row">
-        <form action="{{url_for('user')}}" method="post" class="text-center">
-            <label class="col">Searching location/pincode:</label>
-            <input class="col" name="loc" type="text" name="location">
-            <button class="btn btn-success btn-sm" type="submit">Search</button>
-        </form>
-        
-    </div>
-    <div class="container-fluid ">
-        <div class="row">
-        <div class="col-12 text-center bg-primary text-dark p-2 h2 mt-3">Parking Lots @ {{location}}</div>
-        {% for lot,spot in lot_spot %}
-        <div class="col-3">{{lot.id}}</div>
-        <div class="col-3">{{lot.address}}</div>
-        <div class="col-3">availability</div>
-        <div class="col-3">Book</div>
-        {% endfor %}
+</div>
+
+<!-- Search Section -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('user', id=session['user_id']) }}" method="post">
+                    <div class="input-group">
+                        <input class="form-control" name="loc" type="text" placeholder="Search by location name or pincode..." value="{{ location }}">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
         </div>
-       
     </div>
+</div>
+
+<!-- Results Section -->
+{% if lot_spot %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <h4 class="text-secondary">Available Parking Lots{% if location %} @ {{ location }}{% endif %}</h4>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% set ns = namespace(lots={}) %}
+        {% for lot, spot in lot_spot %}
+            {% if lot.id not in ns.lots %}
+                {% set _ = ns.lots.update({lot.id: {'lot': lot, 'two_wheeler': [], 'four_wheeler': []}}) %}
+            {% endif %}
+            {% if spot.vehicle_type == 'Two-Wheeler' %}
+                {% set _ = ns.lots[lot.id]['two_wheeler'].append(spot) %}
+            {% else %}
+                {% set _ = ns.lots[lot.id]['four_wheeler'].append(spot) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% for lot_id, data in ns.lots.items() %}
+            {% set lot = data['lot'] %}
+            {% set two_wheeler_spots = data['two_wheeler'] %}
+            {% set four_wheeler_spots = data['four_wheeler'] %}
+            {% set two_wheeler_available = two_wheeler_spots | selectattr('status', 'equalto', 'A') | list | length %}
+            {% set four_wheeler_available = four_wheeler_spots | selectattr('status', 'equalto', 'A') | list | length %}
+            {% set total_spots = two_wheeler_spots|length + four_wheeler_spots|length %}
+            {% set total_available = two_wheeler_available + four_wheeler_available %}
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ lot.prime_location_name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>📍 Address:</strong> {{ lot.address }}</p>
+                        <p class="mb-1"><strong>📮 Pincode:</strong> {{ lot.pin_code }}</p>
+                        <p class="mb-2"><strong>💰 Rate:</strong> ₹{{ lot.price }}/hour</p>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <p class="mb-2">
+                                <img src="{{ url_for('static', filename='bike-icon.png') }}" alt="Bike" style="width: 25px; height: 25px; vertical-align: middle; margin-right: 5px;">
+                                <strong>Two-Wheeler:</strong> {{ two_wheeler_available }}/{{ two_wheeler_spots|length }} available
+                            </p>
+                            {% if two_wheeler_spots|length > 0 %}
+                            <div class="progress mb-3" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ (two_wheeler_available / two_wheeler_spots|length * 100) }}%">
+                                    {{ two_wheeler_available }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <p class="mb-2">
+                                <img src="{{ url_for('static', filename='car-icon.png') }}" alt="Car" style="width: 30px; height: 30px; vertical-align: middle; margin-right: 5px;">
+                                <strong>Four-Wheeler:</strong> {{ four_wheeler_available }}/{{ four_wheeler_spots|length }} available
+                            </p>
+                            {% if four_wheeler_spots|length > 0 %}
+                            <div class="progress mb-3" style="height: 20px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ (four_wheeler_available / four_wheeler_spots|length * 100) }}%">
+                                    {{ four_wheeler_available }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if total_available > 0 %}
+                            <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#bookModal{{ lot.id }}">
+                                Book Now
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-secondary btn-lg w-100" disabled>No Spots Available</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Modal -->
+            <div class="modal fade" id="bookModal{{ lot.id }}" tabindex="-1" aria-labelledby="bookModalLabel{{ lot.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="bookModalLabel{{ lot.id }}">Book Parking - {{ lot.prime_location_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ url_for('book_spot') }}" method="post">
+                            <div class="modal-body">
+                                <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                
+                                <div class="mb-3">
+                                    <label for="vehicle_type{{ lot.id }}" class="form-label">Vehicle Type:</label>
+                                    <select class="form-select" name="vehicle_type" id="vehicle_type{{ lot.id }}" required onchange="updateSpotOptions{{ lot.id }}(this.value)">
+                                        <option value="">Select Vehicle Type</option>
+                                        {% if two_wheeler_available > 0 %}
+                                        <option value="Two-Wheeler" data-icon="bike">
+                                            <img src="{{ url_for('static', filename='bike-icon.png') }}" alt="Bike" class="vehicle-icon" style=" width: 25px; height: 25px;">Two-Wheeler ({{ two_wheeler_available }} available)</option>
+                                        {% endif %}
+                                        {% if four_wheeler_available > 0 %}
+                                        <option value="Four-Wheeler" data-icon="car">
+                                            <img src="{{ url_for('static', filename='car-icon.png') }}" alt="Car" class="vehicle-icon" style=" width: 30px; height: 30px;">Four-Wheeler ({{ four_wheeler_available }} available)</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="vehicle_number{{ lot.id }}" class="form-label">Vehicle Number:</label>
+                                    <input type="text" class="form-control" name="vehicle_number" id="vehicle_number{{ lot.id }}" required placeholder="e.g., KA-01-AB-1234" pattern="[A-Za-z0-9-]+" title="Only letters, numbers, and hyphens allowed">
+                                </div>
+                                
+                                <input type="hidden" name="spot_id" id="spot_id{{ lot.id }}" value="">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success">Confirm Booking</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                function updateSpotOptions{{ lot.id }}(vehicleType) {
+                    const spotIdField = document.getElementById('spot_id{{ lot.id }}');
+                    const twoWheelerSpots = {{ two_wheeler_spots | selectattr('status', 'equalto', 'A') | map(attribute='id') | list | tojson }};
+                    const fourWheelerSpots = {{ four_wheeler_spots | selectattr('status', 'equalto', 'A') | map(attribute='id') | list | tojson }};
+                    
+                    if (vehicleType === 'Two-Wheeler' && twoWheelerSpots.length > 0) {
+                        spotIdField.value = twoWheelerSpots[0];
+                    } else if (vehicleType === 'Four-Wheeler' && fourWheelerSpots.length > 0) {
+                        spotIdField.value = fourWheelerSpots[0];
+                    } else {
+                        spotIdField.value = '';
+                    }
+                }
+            </script>
+        {% endfor %}
+    </div>
+{% elif location %}
+    <div class="alert alert-info">
+        No parking lots found for "{{ location }}". Try a different search.
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h5>Welcome!</h5>
+        <p class="mb-0">Search for parking lots by location name or pincode to get started.</p>
+    </div>
+{% endif %}
 {% endblock %}

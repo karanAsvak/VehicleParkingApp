@@ -1,29 +1,70 @@
 {% extends "admin_base.html" %}
 
 {% block content %}
-<form action="/addLot" method="post" class="container form-group">
-<div class="row">
-    <label for="location">Location:</label>
-    <input type="text" name="location" id="location">
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="text-primary">Add New Parking Lot</h2>
+    </div>
 </div>
+
 <div class="row">
-    <label for="price">Price:</label>
-    <input type="number" name="price">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('add_lot') }}" method="post">
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location Name:</label>
+                        <input type="text" name="location" id="location" class="form-control" required placeholder="e.g., Downtown Parking">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address:</label>
+                        <input type="text" name="address" id="address" class="form-control" required placeholder="Full address">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pincode" class="form-label">Pincode:</label>
+                        <input type="text" name="pincode" id="pincode" class="form-control" required placeholder="6 digit pincode">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Hourly Rate (₹):</label>
+                        <input type="number" name="price" id="price" class="form-control" required min="0" step="0.01" placeholder="e.g., 50">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="two_wheeler_spots" class="form-label">Two-Wheeler Spots:</label> 
+                        <input type="number" name="two_wheeler_spots" id="two_wheeler_spots" class="form-control" required min="0" value="0" placeholder="e.g., 10">
+                        <small class="text-muted">Number of spots for motorcycles, scooters</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="four_wheeler_spots" class="form-label">Four-Wheeler Spots:</label> 
+                        <input type="number" name="four_wheeler_spots" id="four_wheeler_spots" class="form-control" required min="0" value="0" placeholder="e.g., 10">
+                        <small class="text-muted">Number of spots for cars, SUVs</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg" type="submit">Add Lot</button>
+                        <a href="{{ url_for('admin', id=session['user_id']) }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="alert alert-info">
+            <h5>Instructions:</h5>
+            <ul class="mb-0">
+                <li>Enter a unique location name for easy identification</li>
+                <li>Provide complete address with postal code</li>
+                <li>Set hourly parking rate (per vehicle)</li>
+                <li>Define number of spots for each vehicle type</li>
+                <li>You can set 0 spots for a vehicle type if not needed</li>
+                <li>Spots can be added or removed later</li>
+            </ul>
+        </div>
+    </div>
 </div>
-<div class="row">
-    <label for="address">Address:</label>
-    <input type="text" name="address" id="address">
-</div>
-<div class="row">
-    <label for="pincode">Pincode:</label>
-    <input type="text" name="pincode" id="pincode">
-</div>
-<div class="row">
-    <label for="maxspot">Maximum Spots:</label> 
-    <input type="number" name="maxspot" id="maxspot">
-</div>
-<div class="row">
-    <button class="btn btn-success" type="submit">ADD</button>
-</div>
-</form>
 {% endblock %}
