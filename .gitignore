@@ -55,5 +55,7 @@ dist/
 # -------------------------
 # SQLite (common for Flask)
 # -------------------------
+instance/
+*.sqlite
 *.sqlite3
 *.db
