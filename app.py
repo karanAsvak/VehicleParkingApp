@@ -4,6 +4,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_mail import Mail, Message
 import os
+from threading import Thread
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+def send_email(msg):
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -104,7 +112,7 @@ def send_booking_confirmation_email(user, reservation, spot, lot):
         </html>
         """
         
-        mail.send(msg)
+        send_email(msg)
         return True
     except Exception as e:
         print(f"Error sending booking confirmation email: {e}")
@@ -193,7 +201,7 @@ def send_release_notification_email(user, reservation, spot, lot, total_cost, du
         </html>
         """
         
-        mail.send(msg)
+        send_email(msg)
         return True
     except Exception as e:
         print(f"Error sending release notification email: {e}")
